@@ -291,7 +291,7 @@ def generate_lesson_plan(grade_level, topic, strategy,language):
     "X-Title": "<YOUR_SITE_NAME>", # Optional. Site title for rankings on openrouter.ai.
   },
   extra_body={},
-  model="deepseek/deepseek-r1-0528:free",
+  model="openai/gpt-oss-120b:free",
   messages=[
     {
       "role": "user",
