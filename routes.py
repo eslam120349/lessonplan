@@ -1,10 +1,11 @@
 import os
 import tempfile
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, send_file, session, current_app
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, send_file, session, current_app,abort
 from flask_login import login_user, logout_user, login_required, current_user
 from models import User, Lesson, Presentation
 from forms import LoginForm, RegistrationForm, LessonForm, EditLessonForm, ARLessonForm, UserProfileForm, WhatsAppMessageForm
 from lesson_generator import generate_lesson_plan, gpt_plans
+from docx import Document
 # from ppt_generator import create_presentation
 from textbook_processor import process_textbook_content
 # from whatsapp_sender import process_excel_file, open_whatsapp_web
@@ -597,6 +598,67 @@ def send_individual_whatsapp(index):
 @routes.route('/clear-whatsapp-messages', methods=['POST'])
 @login_required
 def clear_whatsapp_messages():
+
     if 'whatsapp_messages' in session:
         session.pop('whatsapp_messages')
     return jsonify({'success': True})
+
+
+@routes.route("/download-lesson/<int:lesson_id>")
+@login_required
+def download_lesson(lesson_id):
+
+    supabase = current_app.config["SUPABASE_CLIENT"]
+
+    response = (
+        supabase.table("lessons")
+        .select("*")
+        .eq("id", lesson_id)
+        .eq("user_id", current_user.id)
+        .single()
+        .execute()
+    )
+
+    lesson = response.data
+    if not lesson:
+        abort(404)
+
+    doc = Document()
+
+    lines = lesson["generated_plan"].split("\n")
+
+    for line in lines:
+        line = line.strip()
+
+        # عنوان رئيسي ###
+        if line.startswith("###"):
+            doc.add_heading(line.replace("###", "").strip(), level=1)
+
+        # عنوان فرعي ####
+        elif line.startswith("####"):
+            doc.add_heading(line.replace("####", "").strip(), level=2)
+
+        # فاصل ---
+        elif line.startswith("---"):
+            doc.add_page_break()
+
+        # Bullet points
+        elif line.startswith("- "):
+            doc.add_paragraph(line[2:].strip(), style="List Bullet")
+
+        # نص عادي
+        elif line:
+            p = doc.add_paragraph()
+            run = p.add_run(line.replace("**", ""))
+            if "**" in line:
+                run.bold = True
+
+    file_stream = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
+    doc.save(file_stream.name)
+
+    return send_file(
+        file_stream.name,
+        as_attachment=True,
+        download_name=f'{lesson["topic"]}.docx',
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )

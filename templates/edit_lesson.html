@@ -4,172 +4,152 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Lesson - Teacher's Lesson Planner</title>
+
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Marked JS for Markdown parsing -->
+    <!-- Marked JS -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- Custom CSS -->
+
     <style>
         .navbar-brand { font-weight: bold; }
-        .editor-preview h1, .editor-preview h2, .editor-preview h3 { margin-top: 1rem; margin-bottom: 0.5rem; }
+        .editor-preview h1, .editor-preview h2, .editor-preview h3 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
         .editor-preview p { margin-bottom: 0.5rem; }
-        .editor-preview ul, .editor-preview ol { padding-left: 1.5rem; margin-bottom: 0.5rem; }
+        .editor-preview ul, .editor-preview ol {
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
         .editor-preview strong { font-weight: bold; }
-        .editor-preview hr { border-top: 1px solid #6c757d; margin: 1rem 0; }
+        .editor-preview hr {
+            border-top: 1px solid #6c757d;
+            margin: 1rem 0;
+        }
     </style>
 </head>
+
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Teacher's Lesson Planner</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">{% if language == 'ar' %}لوحة التحكم{% else %}Dashboard{% endif %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/lessons">{% if language == 'ar' %}دروسي{% else %}My Lessons{% endif %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/create-lesson">{% if language == 'ar' %}إنشاء درس{% else %}Create Lesson{% endif %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/whatsapp-sender">{% if language == 'ar' %}إرسال رسائل واتساب{% else %}WhatsApp Sender{% endif %}</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {% if language == 'ar' %}
-                                <i class="bi bi-globe"></i> العربية
-                            {% else %}
-                                <i class="bi bi-globe"></i> English
-                            {% endif %}
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('routes.set_language', language='en') }}">English</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('routes.set_language', language='ar') }}">العربية</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <span class="nav-item">
-                        <a href="/user" class="nav-link">{% if language == 'ar' %}مرحباً, {{ current_user.name }}!{% else %}Welcome, {{ current_user.name }}!{% endif %}</a>
-                    </span>
-                </ul>
-                <a href="{{ url_for('routes.logout') }}" class="btn btn-outline-light">{% if language == 'ar' %}تسجيل الخروج{% else %}Logout{% endif %}</a>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Main Content -->
-    <main class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Edit Lesson Plan</h1>
-            <div>
-                <a href="#" class="btn btn-outline-primary me-2">
-                    <i class="bi bi-file-earmark-slides me-1"></i> Generate PowerPoint
-                </a>
-                <a href="/lessons" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i> Back to Lessons
-                </a>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">Teacher's Lesson Planner</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="/lessons">My Lessons</a></li>
+                <li class="nav-item"><a class="nav-link" href="/create-lesson">Create Lesson</a></li>
+                <li class="nav-item"><a class="nav-link" href="/whatsapp-sender">WhatsApp Sender</a></li>
+            </ul>
+
+            <span class="nav-item me-3">
+                <a href="/user" class="nav-link">Welcome, {{ current_user.name }}!</a>
+            </span>
+
+            <a href="{{ url_for('routes.logout') }}" class="btn btn-outline-light">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main -->
+<main class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Edit Lesson Plan</h1>
+        <div>
+            <a href="/download-lesson/{{ lesson.id }}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-file-earmark-word"></i> Download Word
+            </a>
+            <a href="/lessons" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('routes.edit_lesson_form', lesson_id=lesson.id) }}">
+        {{ form.hidden_tag() }}
+
+        <!-- Lesson Details -->
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Lesson Details</h5></div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4"><strong>Topic:</strong> {{ lesson.topic }}</div>
+                    <div class="col-md-4"><strong>Grade:</strong> {{ lesson.grade_level }}</div>
+                    <div class="col-md-4"><strong>Strategy:</strong> {{ lesson.teaching_strategy|replace('_',' ')|title }}</div>
+                </div>
             </div>
         </div>
 
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-info">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <form method="POST" action="{{ url_for('routes.edit_lesson_form', lesson_id=lesson.id) }}">
-            {{ form.hidden_tag() }}
-
-            <!-- Lesson Details -->
-            <div class="card mb-4">
-                <div class="card-header"><h5 class="mb-0">Lesson Details</h5></div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4"><p><strong>Topic:</strong> {{ lesson.topic }}</p></div>
-                        <div class="col-md-4"><p><strong>Grade Level:</strong> {{ lesson.grade_level }}</p></div>
-                        <div class="col-md-4"><p><strong>Teaching Strategy:</strong> {{ lesson.teaching_strategy|replace('_', ' ')|title }}</p></div>
-                    </div>
-                </div>
+        <!-- Preview -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Lesson Content Preview</h5>
+                <button type="button" class="btn btn-outline-light btn-sm" onclick="copyLesson()">
+                    <i class="bi bi-clipboard"></i> Copy
+                </button>
             </div>
 
-            <!-- Lesson Content Preview -->
-            <div class="card mb-4">
-                <div class="card-header"><h5 class="mb-0">Lesson Content Preview</h5></div>
-                <div class="card-body">
-                    <div id="lessonContentPreview" class="editor-preview border rounded p-3 bg-dark text-light">
-                        Loading content...
-                    </div>
-                    {{ form.generated_plan(class="form-control", rows="10", style="display:none;") }}
-                    <div class="form-text mt-2">
-                        <strong>Tips:</strong>
-                        <ul>
-                            <li>Content is automatically formatted</li>
-                            <li>Use normal paragraphs and lists; headings and bold are applied</li>
-                            <li>Double line breaks create new paragraphs</li>
-                        </ul>
-                    </div>
+            <div class="card-body">
+                <div id="lessonContentPreview"
+                     class="editor-preview border rounded p-3 bg-dark text-light">
+                    Loading content...
                 </div>
-            </div>
 
-            <!-- GPT Prompt -->
-            <div class="card mb-4">
-                <div class="card-header"><h5 class="mb-0">GPT Prompt</h5></div>
-                <div class="card-body">
-                    {{ form.gpt_plan(class="form-control", rows="2") }}
-                    {% if form.gpt_plan.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.gpt_plan.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Form Buttons -->
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
-                <a href="/lessons" class="btn btn-secondary">Cancel</a>
-                {{ form.submit(class="btn btn-primary") }}
-            </div>
-        </form>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Teacher's Lesson Planner</h5>
-                    <p>Making lesson planning easier and more effective.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>© 2025 Teacher's Lesson Planner. All rights reserved.</p>
-                </div>
+                {{ form.generated_plan(class="form-control", style="display:none;") }}
             </div>
         </div>
-    </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- GPT Prompt -->
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">GPT Prompt</h5></div>
+            <div class="card-body">
+                {{ form.gpt_plan(class="form-control", rows="2") }}
+            </div>
+        </div>
 
-    <!-- Markdown to HTML -->
-    <script>
-        const rawMarkdown = {{ lesson.generated_plan|tojson|safe }};
-        const previewDiv = document.getElementById('lessonContentPreview');
-        previewDiv.innerHTML = marked.parse(rawMarkdown);
-    </script>
+        <!-- Buttons -->
+        <div class="text-end">
+            <a href="/lessons" class="btn btn-secondary">Cancel</a>
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+
+    </form>
+</main>
+
+<!-- Footer -->
+<footer class="bg-dark text-light py-4 mt-5">
+    <div class="container text-center">
+        © 2025 Teacher's Lesson Planner
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Markdown Render -->
+<script>
+    const rawMarkdown = {{ lesson.generated_plan|tojson|safe }};
+    const previewDiv = document.getElementById('lessonContentPreview');
+    previewDiv.innerHTML = marked.parse(rawMarkdown);
+</script>
+
+<!-- Copy Function -->
+<script>
+function copyLesson() {
+    const text = document.getElementById("lessonContentPreview").innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert("تم نسخ محتوى الدرس ✅");
+    });
+}
+</script>
+
 </body>
 </html>
