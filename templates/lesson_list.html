@@ -1,152 +1,168 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="{{ 'ar' if language == 'ar' else 'en' }}" {{ 'dir="rtl"' if language == 'ar' else '' }} class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Lessons - Teacher's Lesson Planner</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Custom CSS -->
-    <style>
-        .navbar-brand {
-            font-weight: bold;
-        }
-        .lesson-card {
-            transition: transform 0.2s;
-        }
-        .lesson-card:hover {
-            transform: translateY(-5px);
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .lesson-card {
+                transition: transform 0.2s ease;
+            }
+            .lesson-card:hover {
+                transform: translateY(-5px);
+            }
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Teacher's Lesson Planner</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">{% if language == 'ar' %}لوحة التحكم{% else %}Dashboard{% endif %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/lessons">{% if language == 'ar' %}دروسي{% else %}My Lessons{% endif %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/create-lesson">{% if language == 'ar' %}إنشاء درس{% else %}Create Lesson{% endif %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/whatsapp-sender">{% if language == 'ar' %}إرسال رسائل واتساب{% else %}WhatsApp Sender{% endif %}</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {% if language == 'ar' %}
-                                <i class="bi bi-globe"></i> العربية
-                            {% else %}
-                                <i class="bi bi-globe"></i> English
-                            {% endif %}
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('routes.set_language', language='en') }}">English</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('routes.set_language', language='ar') }}">العربية</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <span class="nav-item">
-                        <a  href="/user" class="nav-link" >{% if language == 'ar' %}مرحباً, {{ current_user.name }}!{% else %}Welcome, {{ current_user.name }}!{% endif %}</a>
-                    </span>
-                    </ul>
-                <a href="{{ url_for('routes.logout') }}" class="btn btn-outline-light">{% if language == 'ar' %}تسجيل الخروج{% else %}Logout{% endif %}</a>
-            </div>
-        </div>
-    </nav>
+    {% include "navbar.html" %}
+
 
     <!-- Main Content -->
-    <main class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>My Lesson Plans</h1>
-            <a href="{{ url_for('routes.create_lesson_form') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle me-2"></i> Create New Lesson
+    <main class="container mx-auto px-4 py-8">
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <h1 class="text-4xl font-bold text-white">
+                {% if language == 'ar' %}دروسي{% else %}My Lesson Plans{% endif %}
+            </h1>
+            <a href="{{ url_for('routes.create_lesson_form') }}" 
+               class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300 inline-flex items-center">
+                <i class="bi bi-plus-circle mr-2"></i>
+                {% if language == 'ar' %}إنشاء درس جديد{% else %}Create New Lesson{% endif %}
             </a>
         </div>
         
+        <!-- Flash Messages -->
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-info">{{ message }}</div>
+                    <div class="bg-blue-500/20 border border-blue-500 text-blue-200 px-4 py-3 rounded-lg mb-6">
+                        {{ message }}
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
         
         {% if lessons %}
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <!-- Lessons Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for lesson in lessons %}
-                    <div class="col">
-                        <div class="card h-100 lesson-card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <span class="badge bg-primary">Grade {{ lesson.grade_level }}</span>
-                                <span class="badge bg-secondary">{{ lesson.teaching_strategy|replace('_', ' ')|title }}</span>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">{{ lesson.topic }}</h5>
-                                <p class="card-text text-muted small">
-                                    Created: {{ lesson.date_created[:10] }}
-                                    <br>
-                                    Modified: {{ lesson.date_modified[:10] }}
-                                </p>
-                            </div>
-                            <div class="card-footer">
-                                <div class="btn-group w-100">
-                                    <a href="{{ url_for('routes.edit_lesson_form', lesson_id=lesson.id) }}" class="btn btn-outline-primary">
-                                        <i class="bi bi-pencil me-1"></i> Edit
-                                    </a>
-                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ lesson.id }}">
-                                        <i class="bi bi-trash me-1"></i> Delete
-                                    </button>
-                                </div>
+                    <div class="lesson-card bg-gray-800 rounded-lg shadow-lg border border-gray-700 flex flex-col h-full">
+                        <!-- Card Header -->
+                        <div class="p-4 border-b border-gray-700 flex justify-between items-center gap-2">
+                            <span class="bg-indigo-600 text-white text-sm font-medium px-3 py-1 rounded-full">
+                                {% if language == 'ar' %}المرحلة{% else %}Grade{% endif %} {{ lesson.grade_level }}
+                            </span>
+                            <span class="bg-gray-600 text-gray-200 text-sm font-medium px-3 py-1 rounded-full">
+                                {{ lesson.teaching_strategy|replace('_', ' ')|title }}
+                            </span>
+                        </div>
+                        
+                        <!-- Card Body -->
+                        <div class="p-6 flex-grow">
+                            <h5 class="text-xl font-bold text-white mb-4">{{ lesson.topic }}</h5>
+                            <p class="text-gray-400 text-sm">
+                                <span class="block mb-1">
+                                    <strong>{% if language == 'ar' %}تاريخ الإنشاء:{% else %}Created:{% endif %}</strong> {{ lesson.date_created[:10] }}
+                                </span>
+                                <span class="block">
+                                    <strong>{% if language == 'ar' %}تاريخ التعديل:{% else %}Modified:{% endif %}</strong> {{ lesson.date_modified[:10] }}
+                                </span>
+                            </p>
+                        </div>
+                        
+                        <!-- Card Footer -->
+                        <div class="p-4 border-t border-gray-700">
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="{{ url_for('routes.edit_lesson_form', lesson_id=lesson.id) }}" 
+                                   class="border-2 border-indigo-600 text-indigo-400 hover:bg-indigo-600 hover:text-white font-medium py-2 px-4 rounded-lg transition duration-300 text-center">
+                                    <i class="bi bi-pencil mr-1"></i> 
+                                    {% if language == 'ar' %}تعديل{% else %}Edit{% endif %}
+                                </a>
+                                <button type="button" 
+                                        onclick="openDeleteModal('{{ lesson.id }}', '{{ lesson.topic }}')"
+                                        class="border-2 border-red-600 text-red-400 hover:bg-red-600 hover:text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+                                    <i class="bi bi-trash mr-1"></i> 
+                                    {% if language == 'ar' %}حذف{% else %}Delete{% endif %}
+                                </button>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Delete Confirmation Modal -->
-                    <div class="modal fade" id="deleteModal{{ lesson.id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Confirm Deletion</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p>Are you sure you want to delete the lesson plan <strong>"{{ lesson.topic }}"</strong>?</p>
-                                    <p class="text-danger">This action cannot be undone.</p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    <form action="{{ url_for('routes.delete_lesson_api', lesson_id=lesson.id) }}" method="POST">
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
-                                </div>
+                    <div id="deleteModal{{ lesson.id }}" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+                        <div class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 border border-gray-700">
+                            <!-- Modal Header -->
+                            <div class="flex justify-between items-center p-6 border-b border-gray-700">
+                                <h5 class="text-xl font-bold text-white">
+                                    {% if language == 'ar' %}تأكيد الحذف{% else %}Confirm Deletion{% endif %}
+                                </h5>
+                                <button onclick="closeDeleteModal('{{ lesson.id }}')" 
+                                        class="text-gray-400 hover:text-white transition">
+                                    <i class="bi bi-x-lg text-xl"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Modal Body -->
+                            <div class="p-6">
+                                <p class="text-gray-300 mb-4">
+                                    {% if language == 'ar' %}
+                                        هل أنت متأكد من حذف خطة الدرس <strong>"{{ lesson.topic }}"</strong>؟
+                                    {% else %}
+                                        Are you sure you want to delete the lesson plan <strong>"{{ lesson.topic }}"</strong>?
+                                    {% endif %}
+                                </p>
+                                <p class="text-red-400">
+                                    {% if language == 'ar' %}
+                                        لا يمكن التراجع عن هذا الإجراء.
+                                    {% else %}
+                                        This action cannot be undone.
+                                    {% endif %}
+                                </p>
+                            </div>
+                            
+                            <!-- Modal Footer -->
+                            <div class="flex justify-end gap-3 p-6 border-t border-gray-700">
+                                <button onclick="closeDeleteModal('{{ lesson.id }}')" 
+                                        class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                                    {% if language == 'ar' %}إلغاء{% else %}Cancel{% endif %}
+                                </button>
+                                <form action="{{ url_for('routes.delete_lesson_api', lesson_id=lesson.id) }}" method="POST" class="inline">
+                                    <button type="submit" 
+                                            class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                                        {% if language == 'ar' %}حذف{% else %}Delete{% endif %}
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="bi bi-journal-text display-1 text-muted mb-3"></i>
-                    <h3>No Lesson Plans Yet</h3>
-                    <p class="lead">Create your first lesson plan to get started</p>
-                    <a href="{{ url_for('routes.create_lesson_form') }}" class="btn btn-primary btn-lg mt-3">
-                        <i class="bi bi-plus-circle me-2"></i> Create First Lesson
+            <!-- Empty State -->
+            <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+                <div class="p-12 text-center">
+                    <i class="bi bi-journal-text text-6xl text-gray-600 mb-6"></i>
+                    <h3 class="text-2xl font-bold text-white mb-3">
+                        {% if language == 'ar' %}لا توجد دروس بعد{% else %}No Lesson Plans Yet{% endif %}
+                    </h3>
+                    <p class="text-xl text-gray-400 mb-6">
+                        {% if language == 'ar' %}انشء درسك الأول للبدء{% else %}Create your first lesson plan to get started{% endif %}
+                    </p>
+                    <a href="{{ url_for('routes.create_lesson_form') }}" 
+                       class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-medium py-3 px-8 rounded-lg transition duration-300">
+                        <i class="bi bi-plus-circle mr-2"></i>
+                        {% if language == 'ar' %}إنشاء أول درس{% else %}Create First Lesson{% endif %}
                     </a>
                 </div>
             </div>
@@ -154,21 +170,32 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Teacher's Lesson Planner</h5>
-                    <p>Making lesson planning easier and more effective.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>© 2025 Teacher's Lesson Planner. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+     {% include "footer.html" %}
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript for Modal -->
+    <script>
+        function openDeleteModal(lessonId, lessonTopic) {
+            document.getElementById('deleteModal' + lessonId).classList.remove('hidden');
+            document.getElementById('deleteModal' + lessonId).classList.add('flex');
+        }
+        
+        function closeDeleteModal(lessonId) {
+            document.getElementById('deleteModal' + lessonId).classList.add('hidden');
+            document.getElementById('deleteModal' + lessonId).classList.remove('flex');
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modals = document.querySelectorAll('[id^="deleteModal"]');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            });
+        });
+    </script>
+
 </body>
 </html>

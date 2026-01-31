@@ -1,144 +1,190 @@
 <!DOCTYPE html>
-<html lang="{{ 'ar' if language == 'ar' else 'en' }}" {{ 'dir="rtl"' if language == 'ar' else '' }} data-bs-theme="dark">
+<html lang="{{ 'ar' if language == 'ar' else 'en' }}" {{ 'dir="rtl"' if language == 'ar' else '' }} class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher's Lesson Planner</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Custom CSS -->
-    <style>
-        .auth-form {
-            max-width: 450px;
-            margin: 2rem auto;
-        }
-        .navbar-brand {
-            font-weight: bold;
-        }
-        .hero-section {
-            padding: 5rem 0;
-            background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-    </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Teacher's Lesson Planner</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {% if language == 'ar' %}
-                                <i class="bi bi-globe"></i> العربية
-                            {% else %}
-                                <i class="bi bi-globe"></i> English
-                            {% endif %}
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('routes.set_language', language='en') }}">English</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('routes.set_language', language='ar') }}">العربية</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/login">{% if language == 'ar' %}تسجيل الدخول{% else %}Login{% endif %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/register">{% if language == 'ar' %}التسجيل{% else %}Register{% endif %}</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    {% include "navbar.html" %}
 
     <!-- Main Content -->
-    <main class="container py-4">
-        <div class="row mb-5">
-            <div class="col-md-12">
-                <div class="hero-section text-center">
-                    <h1>Streamline Your Lesson Planning</h1>
-                    <p class="lead">Create professional lesson plans with AI assistance and export to PowerPoint with just a few clicks.</p>
-                    <div class="mt-4">
-                        <a href="/register" class="btn btn-primary btn-lg">Get Started</a>
-                        <a href="/login" class="btn btn-outline-secondary btn-lg ms-2">Login</a>
-                    </div>
+    <main class="container mx-auto px-4 py-8">
+        
+        <!-- Hero Section -->
+        <div class="mb-16">
+            <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-12 md:p-16 text-center shadow-2xl border border-gray-700">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+                    {% if language == 'ar' %}
+                        بسّط عملية تخطيط دروسك
+                    {% else %}
+                        Streamline Your Lesson Planning
+                    {% endif %}
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    {% if language == 'ar' %}
+                        أنشئ خطط دروس احترافية بمساعدة الذكاء الاصطناعي وصدّرها إلى PowerPoint ببضع نقرات فقط.
+                    {% else %}
+                        Create professional lesson plans with AI assistance and export to PowerPoint with just a few clicks.
+                    {% endif %}
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                    <a href="/register" 
+                       class="bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold py-4 px-10 rounded-lg transition duration-300 shadow-lg hover:shadow-xl">
+                        {% if language == 'ar' %}ابدأ الآن{% else %}Get Started{% endif %}
+                    </a>
+                    <a href="/login" 
+                       class="border-2 border-gray-300 text-gray-300 hover:bg-gray-700 hover:text-white text-lg font-semibold py-4 px-10 rounded-lg transition duration-300">
+                        {% if language == 'ar' %}تسجيل الدخول{% else %}Login{% endif %}
+                    </a>
                 </div>
             </div>
         </div>
 
-        <div class="row mb-5">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-lightbulb display-4 text-primary mb-3"></i>
-                        <h3>AI-Powered Generation</h3>
-                        <p>Let our intelligent system create structured lesson plans based on your grade level, topic, and teaching strategy.</p>
+        <!-- Features Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <!-- Feature 1: AI-Powered -->
+            <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-8 hover:transform hover:scale-105 transition duration-300">
+                <div class="text-center">
+                    <div class="inline-block p-4 bg-indigo-500/20 rounded-full mb-4">
+                        <i class="bi bi-lightbulb text-5xl text-indigo-400"></i>
                     </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">
+                        {% if language == 'ar' %}مدعوم بالذكاء الاصطناعي{% else %}AI-Powered Generation{% endif %}
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        {% if language == 'ar' %}
+                            دع نظامنا الذكي ينشئ خطط دروس منظمة بناءً على مستواك الدراسي والموضوع واستراتيجية التدريس.
+                        {% else %}
+                            Let our intelligent system create structured lesson plans based on your grade level, topic, and teaching strategy.
+                        {% endif %}
+                    </p>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-file-earmark-slides display-4 text-primary mb-3"></i>
-                        <h3>PowerPoint Export</h3>
-                        <p>Turn your lesson plans into professional presentations with a single click.</p>
+
+            <!-- Feature 2: PowerPoint Export -->
+            <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-8 hover:transform hover:scale-105 transition duration-300">
+                <div class="text-center">
+                    <div class="inline-block p-4 bg-green-500/20 rounded-full mb-4">
+                        <i class="bi bi-file-earmark-slides text-5xl text-green-400"></i>
                     </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">
+                        {% if language == 'ar' %}تصدير إلى PowerPoint{% else %}PowerPoint Export{% endif %}
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        {% if language == 'ar' %}
+                            حوّل خطط دروسك إلى عروض تقديمية احترافية بنقرة واحدة فقط.
+                        {% else %}
+                            Turn your lesson plans into professional presentations with a single click.
+                        {% endif %}
+                    </p>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-cloud-arrow-up display-4 text-primary mb-3"></i>
-                        <h3>Cloud Storage</h3>
-                        <p>Access your lesson plans from anywhere and never worry about losing your work.</p>
+
+            <!-- Feature 3: Cloud Storage -->
+            <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-8 hover:transform hover:scale-105 transition duration-300">
+                <div class="text-center">
+                    <div class="inline-block p-4 bg-cyan-500/20 rounded-full mb-4">
+                        <i class="bi bi-cloud-arrow-up text-5xl text-cyan-400"></i>
                     </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">
+                        {% if language == 'ar' %}تخزين سحابي{% else %}Cloud Storage{% endif %}
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        {% if language == 'ar' %}
+                            الوصول إلى خطط دروسك من أي مكان ولا تقلق أبدًا بشأن فقدان عملك.
+                        {% else %}
+                            Access your lesson plans from anywhere and never worry about losing your work.
+                        {% endif %}
+                    </p>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-6">
-                <h2>How It Works</h2>
-                <ul class="list-group list-group-flush mb-4">
-                    <li class="list-group-item">1. Select your grade level and subject area</li>
-                    <li class="list-group-item">2. Choose a teaching strategy that fits your style</li>
-                    <li class="list-group-item">3. Enter your lesson topic</li>
-                    <li class="list-group-item">4. Review and customize the generated lesson plan</li>
-                    <li class="list-group-item">5. Export to PowerPoint for classroom presentation</li>
+        <!-- How It Works & About Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- How It Works -->
+            <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-8">
+                <h2 class="text-3xl font-bold text-white mb-6">
+                    {% if language == 'ar' %}كيف يعمل{% else %}How It Works{% endif %}
+                </h2>
+                <ul class="space-y-4">
+                    <li class="flex items-start space-x-3 {{ 'space-x-reverse' if language == 'ar' else '' }}">
+                        <span class="flex-shrink-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">1</span>
+                        <span class="text-gray-300 pt-1">
+                            {% if language == 'ar' %}اختر مستواك الدراسي والمادة{% else %}Select your grade level and subject area{% endif %}
+                        </span>
+                    </li>
+                    <li class="flex items-start space-x-3 {{ 'space-x-reverse' if language == 'ar' else '' }}">
+                        <span class="flex-shrink-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">2</span>
+                        <span class="text-gray-300 pt-1">
+                            {% if language == 'ar' %}اختر استراتيجية تدريس تناسب أسلوبك{% else %}Choose a teaching strategy that fits your style{% endif %}
+                        </span>
+                    </li>
+                    <li class="flex items-start space-x-3 {{ 'space-x-reverse' if language == 'ar' else '' }}">
+                        <span class="flex-shrink-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">3</span>
+                        <span class="text-gray-300 pt-1">
+                            {% if language == 'ar' %}أدخل موضوع درسك{% else %}Enter your lesson topic{% endif %}
+                        </span>
+                    </li>
+                    <li class="flex items-start space-x-3 {{ 'space-x-reverse' if language == 'ar' else '' }}">
+                        <span class="flex-shrink-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">4</span>
+                        <span class="text-gray-300 pt-1">
+                            {% if language == 'ar' %}راجع وعدّل خطة الدرس المُنشأة{% else %}Review and customize the generated lesson plan{% endif %}
+                        </span>
+                    </li>
+                    <li class="flex items-start space-x-3 {{ 'space-x-reverse' if language == 'ar' else '' }}">
+                        <span class="flex-shrink-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">5</span>
+                        <span class="text-gray-300 pt-1">
+                            {% if language == 'ar' %}صدّر إلى PowerPoint لعرضه في الفصل{% else %}Export to PowerPoint for classroom presentation{% endif %}
+                        </span>
+                    </li>
                 </ul>
             </div>
-            <div class="col-md-6">
-                <h2>For Teachers, By Teachers</h2>
-                <p>Our lesson planning platform was designed with input from experienced educators to ensure it meets the real needs of teachers.</p>
-                <p>We understand the time constraints teachers face, and our goal is to make lesson planning efficient without sacrificing quality.</p>
-                <p>Join thousands of educators who are already saving hours each week on lesson preparation.</p>
+
+            <!-- About Section -->
+            <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-8">
+                <h2 class="text-3xl font-bold text-white mb-6">
+                    {% if language == 'ar' %}للمعلمين، من المعلمين{% else %}For Teachers, By Teachers{% endif %}
+                </h2>
+                <div class="space-y-4 text-gray-300 leading-relaxed">
+                    <p>
+                        {% if language == 'ar' %}
+                            تم تصميم منصة تخطيط الدروس لدينا بمساهمة من معلمين ذوي خبرة لضمان تلبية احتياجات المعلمين الحقيقية.
+                        {% else %}
+                            Our lesson planning platform was designed with input from experienced educators to ensure it meets the real needs of teachers.
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if language == 'ar' %}
+                            نحن نفهم قيود الوقت التي يواجهها المعلمون، وهدفنا هو جعل تخطيط الدروس فعالاً دون التضحية بالجودة.
+                        {% else %}
+                            We understand the time constraints teachers face, and our goal is to make lesson planning efficient without sacrificing quality.
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if language == 'ar' %}
+                            انضم إلى آلاف المعلمين الذين يوفرون ساعات كل أسبوع في إعداد الدروس.
+                        {% else %}
+                            Join thousands of educators who are already saving hours each week on lesson preparation.
+                        {% endif %}
+                    </p>
+                </div>
             </div>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Teacher's Lesson Planner</h5>
-                    <p>Making lesson planning easier and more effective.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>© 2025 Teacher's Lesson Planner. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+    {% include "footer.html" %}
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

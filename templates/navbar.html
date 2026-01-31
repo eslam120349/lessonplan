@@ -1,0 +1,166 @@
+{% set link_base = "
+relative text-sm font-medium transition-colors duration-300
+after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-1
+after:h-[2px] after:w-0 after:bg-blue-500
+after:transition-all after:duration-300
+hover:after:w-full
+" %}
+
+<nav class="bg-gray-900 border-b border-gray-800">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Brand -->
+      <a href="/"
+         class="text-xl font-bold text-white tracking-wide hover:text-blue-400 transition">
+        Teacher's Lesson Planner
+      </a>
+
+      <!-- Mobile Button -->
+      <button class="lg:hidden text-gray-300 hover:text-white"
+              onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
+        <i class="bi bi-list text-3xl"></i>
+      </button>
+
+      <!-- Desktop -->
+      <div class="hidden lg:flex items-center gap-8">
+
+        {% if current_user.is_authenticated %}
+        <!-- Main Links -->
+        <div class="flex gap-6">
+
+          <a href="/dashboard"
+             class="{{ link_base }}
+                    {% if active_page == 'dashboard' %}
+                      text-white after:w-full
+                    {% else %}
+                      text-gray-300 hover:text-white
+                    {% endif %}">
+            {% if language == 'ar' %}لوحة التحكم{% else %}Dashboard{% endif %}
+          </a>
+
+          <a href="/lessons"
+             class="{{ link_base }}
+                    {% if active_page == 'lessons' %}
+                      text-white after:w-full
+                    {% else %}
+                      text-gray-300 hover:text-white
+                    {% endif %}">
+            {% if language == 'ar' %}دروسي{% else %}My Lessons{% endif %}
+          </a>
+
+          <a href="/create-lesson"
+             class="{{ link_base }}
+                    {% if active_page == 'create' %}
+                      text-white after:w-full
+                    {% else %}
+                      text-gray-300 hover:text-white
+                    {% endif %}">
+            {% if language == 'ar' %}إنشاء درس{% else %}Create Lesson{% endif %}
+          </a>
+
+          <a href="/whatsapp-sender"
+             class="{{ link_base }}
+                    {% if active_page == 'whatsapp' %}
+                      text-white after:w-full
+                    {% else %}
+                      text-gray-300 hover:text-white
+                    {% endif %}">
+            {% if language == 'ar' %}واتساب{% else %}WhatsApp{% endif %}
+          </a>
+
+        </div>
+
+        <!-- User -->
+        <div class="flex items-center gap-4 pl-6 border-l border-gray-700">
+          <a href="/user" class="text-gray-300 hover:text-white text-sm">
+            {{ current_user.name }}
+          </a>
+
+          <a href="{{ url_for('routes.logout') }}"
+             class="px-4 py-2 text-sm border border-blue-600 text-blue-400 rounded-lg
+                    hover:bg-blue-600 hover:text-white transition">
+            {% if language == 'ar' %}خروج{% else %}Logout{% endif %}
+          </a>
+        </div>
+
+        {% else %}
+        <!-- Guest -->
+        <a href="/login"
+           class="{{ link_base }}
+                  {% if active_page == 'login' %}
+                    text-white after:w-full
+                  {% else %}
+                    text-gray-300 hover:text-white
+                  {% endif %}">
+          {% if language == 'ar' %}تسجيل الدخول{% else %}Login{% endif %}
+        </a>
+
+        <a href="/register"
+           class="{{ link_base }}
+                  {% if active_page == 'register' %}
+                    text-white after:w-full
+                  {% else %}
+                    text-gray-300 hover:text-white
+                  {% endif %}">
+          {% if language == 'ar' %}التسجيل{% else %}Register{% endif %}
+        </a>
+        {% endif %}
+
+        <!-- Language -->
+        <div class="relative group">
+          <button class="text-gray-300 hover:text-white flex items-center gap-1 text-sm">
+            <i class="bi bi-globe"></i>
+            {{ 'العربية' if language == 'ar' else 'English' }}
+            <i class="bi bi-chevron-down text-xs"></i>
+          </button>
+
+          <div class="absolute right-0 mt-3 w-36 bg-gray-900 border border-gray-700
+                      rounded-lg hidden group-hover:block shadow-lg">
+            <a href="{{ url_for('routes.set_language', language='en') }}"
+               class="block px-4 py-2 text-sm hover:bg-gray-700">English</a>
+            <a href="{{ url_for('routes.set_language', language='ar') }}"
+               class="block px-4 py-2 text-sm hover:bg-gray-700">العربية</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu"
+         class="hidden lg:hidden mt-4 bg-gray-900 rounded-xl
+                border border-gray-800 p-4 space-y-3">
+
+      {% if current_user.is_authenticated %}
+        <a href="/dashboard" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800">
+          Dashboard
+        </a>
+        <a href="/lessons" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800">
+          My Lessons
+        </a>
+        <a href="/create-lesson" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800">
+          Create Lesson
+        </a>
+        <a href="/whatsapp-sender" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800">
+          WhatsApp
+        </a>
+
+        <a href="{{ url_for('routes.logout') }}"
+           class="block text-center px-4 py-2 mt-2
+                  border border-blue-600 text-blue-400 rounded-lg
+                  hover:bg-blue-600 hover:text-white transition">
+          Logout
+        </a>
+      {% else %}
+        <a href="/login" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800">
+          Login
+        </a>
+        <a href="/register" class="block px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-800">
+          Register
+        </a>
+      {% endif %}
+    </div>
+
+  </div>
+</nav>

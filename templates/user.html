@@ -1,222 +1,323 @@
 <!DOCTYPE html>
-<html lang="{{ 'ar' if language == 'ar' else 'en' }}" {{ 'dir="rtl"' if language == 'ar' else '' }} data-bs-theme="dark">
+<html lang="{{ 'ar' if language == 'ar' else 'en' }}" {{ 'dir="rtl"' if language == 'ar' else '' }} class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Teacher's Lesson Planner</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <title>User Profile - Teacher's Lesson Planner</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Custom CSS -->
-    <style>
-        .navbar-brand {
-            font-weight: bold;
-        }
-        .stat-card {
-            transition: transform 0.3s;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        .btn-action {
-            min-width: 120px;
-        }
-    </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Teacher's Lesson Planner</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/dashboard">{% if language == 'ar' %}لوحة التحكم{% else %}Dashboard{% endif %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/lessons">{% if language == 'ar' %}دروسي{% else %}My Lessons{% endif %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/create-lesson">{% if language == 'ar' %}إنشاء درس{% else %}Create Lesson{% endif %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/textbook-to-lesson">{% if language == 'ar' %}تحويل الكتاب إلى درس{% else %}Convert Textbook to Lesson{% endif %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/whatsapp-sender">{% if language == 'ar' %}إرسال رسائل واتساب{% else %}WhatsApp Sender{% endif %}</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {% if language == 'ar' %}
-                                <i class="bi bi-globe"></i> العربية
-                            {% else %}
-                                <i class="bi bi-globe"></i> English
-                            {% endif %}
+    <nav class="bg-gray-800 border-b border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between py-3">
+                <!-- Brand -->
+                <a href="/" class="text-xl font-bold text-white hover:text-gray-300 transition">
+                    Teacher's Lesson Planner
+                </a>
+                
+                <!-- Mobile Menu Button -->
+                <button class="lg:hidden text-gray-300 hover:text-white focus:outline-none" 
+                        onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
+                    <i class="bi bi-list text-2xl"></i>
+                </button>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex lg:items-center lg:space-x-8">
+                    <div class="flex space-x-6">
+                        <a href="/dashboard" class="text-gray-300 hover:text-white transition">
+                            {% if language == 'ar' %}لوحة التحكم{% else %}Dashboard{% endif %}
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('routes.set_language', language='en') }}">English</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('routes.set_language', language='ar') }}">العربية</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <span class="nav-item">
-                        <a  href="/user" class="nav-link" >{% if language == 'ar' %}مرحباً, {{ current_user.name }}!{% else %}Welcome, {{ current_user.name }}!{% endif %}</a>
-                    </span>
-                    </ul>
-                <a href="{{ url_for('routes.logout') }}" class="btn btn-outline-light">{% if language == 'ar' %}تسجيل الخروج{% else %}Logout{% endif %}</a>
+                        <a href="/lessons" class="text-gray-300 hover:text-white transition">
+                            {% if language == 'ar' %}دروسي{% else %}My Lessons{% endif %}
+                        </a>
+                        <a href="/create-lesson" class="text-gray-300 hover:text-white transition">
+                            {% if language == 'ar' %}إنشاء درس{% else %}Create Lesson{% endif %}
+                        </a>
+                        <a href="/whatsapp-sender" class="text-gray-300 hover:text-white transition">
+                            {% if language == 'ar' %}إرسال رسائل واتساب{% else %}WhatsApp Sender{% endif %}
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <!-- Language Dropdown -->
+                        <div class="relative group">
+                            <button class="text-gray-300 hover:text-white flex items-center space-x-1 transition">
+                                <i class="bi bi-globe"></i>
+                                <span>{% if language == 'ar' %}العربية{% else %}English{% endif %}</span>
+                                <i class="bi bi-chevron-down text-xs"></i>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-40 bg-gray-800 rounded-lg shadow-lg border border-gray-700 hidden group-hover:block z-50">
+                                <a href="{{ url_for('routes.set_language', language='en') }}" 
+                                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-t-lg transition">
+                                    English
+                                </a>
+                                <a href="{{ url_for('routes.set_language', language='ar') }}" 
+                                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-b-lg transition">
+                                    العربية
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- User Welcome -->
+                        <a href="/user" class="text-white font-medium hover:text-gray-300 transition">
+                            {% if language == 'ar' %}مرحباً, {{ current_user.name }}!{% else %}Welcome, {{ current_user.name }}!{% endif %}
+                        </a>
+                        
+                        <!-- Logout Button -->
+                        <a href="{{ url_for('routes.logout') }}" 
+                           class="px-4 py-2 border border-gray-300 text-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition">
+                            {% if language == 'ar' %}تسجيل الخروج{% else %}Logout{% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div id="mobileMenu" class="hidden lg:hidden pb-4">
+                <div class="flex flex-col space-y-3">
+                    <a href="/dashboard" class="text-gray-300 hover:text-white transition">
+                        {% if language == 'ar' %}لوحة التحكم{% else %}Dashboard{% endif %}
+                    </a>
+                    <a href="/lessons" class="text-gray-300 hover:text-white transition">
+                        {% if language == 'ar' %}دروسي{% else %}My Lessons{% endif %}
+                    </a>
+                    <a href="/create-lesson" class="text-gray-300 hover:text-white transition">
+                        {% if language == 'ar' %}إنشاء درس{% else %}Create Lesson{% endif %}
+                    </a>
+                    <a href="/whatsapp-sender" class="text-gray-300 hover:text-white transition">
+                        {% if language == 'ar' %}إرسال رسائل واتساب{% else %}WhatsApp Sender{% endif %}
+                    </a>
+                    <a href="/user" class="text-white font-medium">
+                        {% if language == 'ar' %}مرحباً, {{ current_user.name }}!{% else %}Welcome, {{ current_user.name }}!{% endif %}
+                    </a>
+                    <a href="{{ url_for('routes.logout') }}" 
+                       class="px-4 py-2 border border-gray-300 text-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition text-center">
+                        {% if language == 'ar' %}تسجيل الخروج{% else %}Logout{% endif %}
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="container py-4">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">{% if language == 'ar' %}الملف الشخصي{% else %}User Profile{% endif %}</h4>
-                    </div>
-                    <div class="card-body">
-                        {% with messages = get_flashed_messages() %}
-                            {% if messages %}
-                                <div class="alert alert-info">
-                                    {% for message in messages %}
-                                        {{ message }}
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto">
+            <div class="bg-gray-800 rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
+                <!-- Card Header -->
+                <div class="bg-indigo-600 px-6 py-4">
+                    <h4 class="text-2xl font-bold text-white">
+                        {% if language == 'ar' %}الملف الشخصي{% else %}User Profile{% endif %}
+                    </h4>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="p-8">
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="bg-blue-500/20 border border-blue-500 text-blue-200 px-4 py-3 rounded-lg mb-6">
+                                {% for message in messages %}
+                                    {{ message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('routes.user') }}">
+                        {{ form.hidden_tag() }}
+
+                        <!-- Name Field -->
+                        <div class="mb-6">
+                            <label for="name" class="block text-sm font-semibold text-gray-200 mb-2">
+                                {% if language == 'ar' %}الاسم{% else %}Name{% endif %}
+                            </label>
+                            {{ form.name(class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent", id="name") }}
+                            {% if form.name.errors %}
+                                <div class="text-red-400 text-sm mt-2">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
                                     {% endfor %}
                                 </div>
                             {% endif %}
-                        {% endwith %}
-
-                        <form method="POST" action="{{ url_for('routes.user') }}">
-                            {{ form.hidden_tag() }}
-
-                            <div class="mb-3">
-                                <label for="name" class="form-label">{% if language == 'ar' %}الاسم{% else %}Name{% endif %}</label>
-                                {{ form.name(class="form-control", id="name") }}
-                                {% if form.name.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.name.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="email" class="form-label">{% if language == 'ar' %}البريد الإلكتروني{% else %}Email{% endif %}</label>
-                                {{ form.email(class="form-control", id="email") }}
-                                {% if form.email.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.email.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="current_password" class="form-label">{% if language == 'ar' %}كلمة المرور الحالية{% else %}Current Password{% endif %}</label>
-                                {{ form.current_password(class="form-control", id="current_password") }}
-                                {% if form.current_password.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.current_password.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">{% if language == 'ar' %}مطلوب لتأكيد التغييرات{% else %}Required to confirm changes{% endif %}</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="new_password" class="form-label">{% if language == 'ar' %}كلمة المرور الجديدة{% else %}New Password{% endif %}</label>
-                                {{ form.new_password(class="form-control", id="new_password") }}
-                                {% if form.new_password.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.new_password.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">{% if language == 'ar' %}اتركها فارغة إذا كنت لا ترغب في تغيير كلمة المرور{% else %}Leave empty if you don't want to change your password{% endif %}</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="confirm_password" class="form-label">{% if language == 'ar' %}تأكيد كلمة المرور{% else %}Confirm Password{% endif %}</label>
-                                {{ form.confirm_password(class="form-control", id="confirm_password") }}
-                                {% if form.confirm_password.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.confirm_password.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            <div class="d-grid gap-2">
-                                {{ form.submit(class="btn btn-primary") }}
-                            </div>
-                        </form>
-
-                        <hr class="my-4">
-
-                        <div class="row justify-content-center">
-                            <div class="card-body">
-                                <h5 class="card-title text-danger">{% if language == 'ar' %}حذف الحساب{% else %}Delete Account{% endif %}</h5>
-                                <p class="card-text">{% if language == 'ar' %}تحذير: هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع دروسك وبياناتك نهائيًا.{% else %}Warning: This action cannot be undone. All your lessons and data will be permanently deleted.{% endif %}</p>
-                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
-                                    {% if language == 'ar' %}حذف حسابي{% else %}Delete My Account{% endif %}
-                                </button>
-                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Delete Account Modal -->
-        <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteAccountModalLabel">{% if language == 'ar' %}تأكيد حذف الحساب{% else %}Confirm Account Deletion{% endif %}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>{% if language == 'ar' %}هل أنت متأكد أنك تريد حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه.{% else %}Are you sure you want to delete your account? This action cannot be undone.{% endif %}</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% if language == 'ar' %}إلغاء{% else %}Cancel{% endif %}</button>
-                        <form action="{{ url_for('routes.delete_account') }}" method="POST">
-                            <button type="submit" class="btn btn-danger">{% if language == 'ar' %}نعم، احذف حسابي{% else %}Yes, Delete My Account{% endif %}</button>
-                        </form>
+                        <!-- Email Field -->
+                        <div class="mb-6">
+                            <label for="email" class="block text-sm font-semibold text-gray-200 mb-2">
+                                {% if language == 'ar' %}البريد الإلكتروني{% else %}Email{% endif %}
+                            </label>
+                            {{ form.email(class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent", id="email") }}
+                            {% if form.email.errors %}
+                                <div class="text-red-400 text-sm mt-2">
+                                    {% for error in form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Current Password Field -->
+                        <div class="mb-6">
+                            <label for="current_password" class="block text-sm font-semibold text-gray-200 mb-2">
+                                {% if language == 'ar' %}كلمة المرور الحالية{% else %}Current Password{% endif %}
+                            </label>
+                            {{ form.current_password(class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent", id="current_password") }}
+                            {% if form.current_password.errors %}
+                                <div class="text-red-400 text-sm mt-2">
+                                    {% for error in form.current_password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <p class="text-gray-400 text-sm mt-2">
+                                {% if language == 'ar' %}مطلوب لتأكيد التغييرات{% else %}Required to confirm changes{% endif %}
+                            </p>
+                        </div>
+
+                        <!-- New Password Field -->
+                        <div class="mb-6">
+                            <label for="new_password" class="block text-sm font-semibold text-gray-200 mb-2">
+                                {% if language == 'ar' %}كلمة المرور الجديدة{% else %}New Password{% endif %}
+                            </label>
+                            {{ form.new_password(class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent", id="new_password") }}
+                            {% if form.new_password.errors %}
+                                <div class="text-red-400 text-sm mt-2">
+                                    {% for error in form.new_password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <p class="text-gray-400 text-sm mt-2">
+                                {% if language == 'ar' %}اتركها فارغة إذا كنت لا ترغب في تغيير كلمة المرور{% else %}Leave empty if you don't want to change your password{% endif %}
+                            </p>
+                        </div>
+
+                        <!-- Confirm Password Field -->
+                        <div class="mb-8">
+                            <label for="confirm_password" class="block text-sm font-semibold text-gray-200 mb-2">
+                                {% if language == 'ar' %}تأكيد كلمة المرور{% else %}Confirm Password{% endif %}
+                            </label>
+                            {{ form.confirm_password(class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent", id="confirm_password") }}
+                            {% if form.confirm_password.errors %}
+                                <div class="text-red-400 text-sm mt-2">
+                                    {% for error in form.confirm_password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mb-8">
+                            {{ form.submit(class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition duration-300 cursor-pointer") }}
+                        </div>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="border-t border-gray-700 my-8"></div>
+
+                    <!-- Delete Account Section -->
+                    <div class="bg-red-500/10 border border-red-500 rounded-lg p-6">
+                        <h5 class="text-xl font-bold text-red-400 mb-3">
+                            {% if language == 'ar' %}حذف الحساب{% else %}Delete Account{% endif %}
+                        </h5>
+                        <p class="text-gray-300 mb-4">
+                            {% if language == 'ar' %}
+                                تحذير: هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع دروسك وبياناتك نهائيًا.
+                            {% else %}
+                                Warning: This action cannot be undone. All your lessons and data will be permanently deleted.
+                            {% endif %}
+                        </p>
+                        <button 
+                            type="button" 
+                            onclick="openDeleteModal()"
+                            class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300"
+                        >
+                            {% if language == 'ar' %}حذف حسابي{% else %}Delete My Account{% endif %}
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-    <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Teacher's Lesson Planner</h5>
-                    <p>Making lesson planning easier and more effective.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>© 2025 Teacher's Lesson Planner. All rights reserved.</p>
-                </div>
+
+    <!-- Delete Account Modal -->
+    <div id="deleteAccountModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 border border-gray-700">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-6 border-b border-gray-700">
+                <h5 class="text-xl font-bold text-white">
+                    {% if language == 'ar' %}تأكيد حذف الحساب{% else %}Confirm Account Deletion{% endif %}
+                </h5>
+                <button 
+                    onclick="closeDeleteModal()" 
+                    class="text-gray-400 hover:text-white transition"
+                >
+                    <i class="bi bi-x-lg text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-6">
+                <p class="text-gray-300">
+                    {% if language == 'ar' %}
+                        هل أنت متأكد أنك تريد حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه.
+                    {% else %}
+                        Are you sure you want to delete your account? This action cannot be undone.
+                    {% endif %}
+                </p>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="flex justify-end gap-3 p-6 border-t border-gray-700">
+                <button 
+                    onclick="closeDeleteModal()" 
+                    class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition"
+                >
+                    {% if language == 'ar' %}إلغاء{% else %}Cancel{% endif %}
+                </button>
+                <form action="{{ url_for('routes.delete_account') }}" method="POST" class="inline">
+                    <button 
+                        type="submit" 
+                        class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition"
+                    >
+                        {% if language == 'ar' %}نعم، احذف حسابي{% else %}Yes, Delete My Account{% endif %}
+                    </button>
+                </form>
             </div>
         </div>
-    </footer>
+    </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Footer -->
+     {% include "footer.html" %}
+
+
+    <!-- JavaScript for Modal -->
+    <script>
+        function openDeleteModal() {
+            document.getElementById('deleteAccountModal').classList.remove('hidden');
+            document.getElementById('deleteAccountModal').classList.add('flex');
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('deleteAccountModal').classList.add('hidden');
+            document.getElementById('deleteAccountModal').classList.remove('flex');
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('deleteAccountModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeDeleteModal();
+            }
+        });
+    </script>
+
 </body>
 </html>
