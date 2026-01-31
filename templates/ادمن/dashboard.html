@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="{{ 'ar' if language == 'ar' else 'en' }}" {{ 'dir="rtl"' if language == 'ar' else '' }} class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if language == 'ar' %}إدارة المستخدمين{% else %}Admin Users Management{% endif %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    {% include "navbar.html" %}
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-6 text-white">
+            {% if language == 'ar' %}لوحة إدارة الأدمن{% else %}Admin Dashboard{% endif %}
+        </h1>
+
+        <div id="alerts" class="space-y-3"></div>
+
+        <div class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-300 mb-2">{% if language == 'ar' %}بحث{% else %}Search{% endif %}</label>
+                    <input id="searchInput" type="text" class="w-full bg-gray-700 border border-gray-600 text-white rounded px-3 py-2" placeholder="{% if language == 'ar' %}ابحث بالاسم أو البريد{% else %}Search by name or email{% endif %}">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-300 mb-2">{% if language == 'ar' %}تصفية الدور{% else %}Role Filter{% endif %}</label>
+                    <select id="roleFilter" class="w-full bg-gray-700 border border-gray-600 text-white rounded px-3 py-2">
+                        <option value="">{% if language == 'ar' %}الكل{% else %}All{% endif %}</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button id="refreshBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">
+                        {% if language == 'ar' %}تحديث القائمة{% else %}Refresh{% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 border border-gray-700 rounded-lg overflow-x-auto">
+            <table class="min-w-full">
+                <thead>
+                    <tr class="border-b border-gray-700">
+                        <th class="text-left py-3 px-4 text-gray-400">{% if language == 'ar' %}الاسم{% else %}Name{% endif %}</th>
+                        <th class="text-left py-3 px-4 text-gray-400">{% if language == 'ar' %}البريد{% else %}Email{% endif %}</th>
+                        <th class="text-left py-3 px-4 text-gray-400">{% if language == 'ar' %}الدور{% else %}Role{% endif %}</th>
+                        <th class="text-left py-3 px-4 text-gray-400">{% if language == 'ar' %}الرصيد{% else %}Tokens{% endif %}</th>
+                        <th class="text-left py-3 px-4 text-gray-400">{% if language == 'ar' %}إجراءات{% else %}Actions{% endif %}</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    {% for u in users %}
+                    <tr class="border-b border-gray-700">
+                        <td class="py-3 px-4 text-gray-300">{{ u.name }}</td>
+                        <td class="py-3 px-4 text-gray-300">{{ u.email }}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-2">
+                                <select class="bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 roleSelect" data-id="{{ u.id }}">
+                                </select>
+                                <label class="flex items-center gap-1 text-xs text-gray-400">
+                                    <input type="checkbox" class="resetBalanceToggle" data-id="{{ u.id }}">
+                                    {% if language == 'ar' %}إعادة الرصيد{% else %}Reset balance{% endif %}
+                                </label>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-indigo-700/30 text-indigo-300 border border-indigo-600">
+                                <i class="bi bi-coin mr-1"></i>
+                                <span class="tokenBalance" data-id="{{ u.id }}">{{ u.token_balance }}</span>
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-2">
+                                <input type="number" class="bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 w-24 tokenAdjustInput" data-id="{{ u.id }}" value="0">
+                                <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded grantBtn" data-id="{{ u.id }}">
+                                    {% if language == 'ar' %}منح{% else %}Grant{% endif %}
+                                </button>
+                                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded revokeBtn" data-id="{{ u.id }}">
+                                    {% if language == 'ar' %}سحب{% else %}Revoke{% endif %}
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+    const language = "{{ language }}"
+    const roleSelects = () => Array.from(document.querySelectorAll('.roleSelect'))
+    const resetBalanceToggles = () => Array.from(document.querySelectorAll('.resetBalanceToggle'))
+    const tokenAdjustInputs = () => Array.from(document.querySelectorAll('.tokenAdjustInput'))
+    const tokenBalanceSpans = () => Array.from(document.querySelectorAll('.tokenBalance'))
+    const usersTableBody = document.getElementById('usersTableBody')
+    const searchInput = document.getElementById('searchInput')
+    const roleFilter = document.getElementById('roleFilter')
+    const alerts = document.getElementById('alerts')
+
+    const alert = (msg, type='info') => {
+        const colors = {
+            info: 'bg-blue-500/20 border-blue-500 text-blue-200',
+            success: 'bg-green-500/20 border-green-500 text-green-200',
+            error: 'bg-red-500/20 border-red-500 text-red-200'
+        }
+        const div = document.createElement('div')
+        div.className = `${colors[type]} border px-4 py-3 rounded`
+        div.textContent = msg
+        alerts.appendChild(div)
+        setTimeout(() => div.remove(), 4000)
+    }
+
+    const fetchRoles = async () => {
+        const r = await fetch('/api/admin/role-configs')
+        const j = await r.json()
+        const roles = (j.roles || []).map(x => x.role)
+        roleFilter.innerHTML = `<option value="">${language === 'ar' ? 'الكل' : 'All'}</option>` + roles.map(r => `<option value="${r}">${r}</option>`).join('')
+        roleSelects().forEach(sel => {
+            const userId = sel.dataset.id
+            const row = sel.closest('tr')
+            const currentRoleCell = row.querySelector('td:nth-child(3)')
+            const currentRoleText = currentRoleCell ? currentRoleCell.textContent.trim() : ''
+            sel.innerHTML = roles.map(r => `<option value="${r}" ${currentRoleText.includes(r) ? 'selected' : ''}>${r}</option>`).join('')
+        })
+    }
+
+    const refreshUsers = async () => {
+        const r = await fetch('/api/admin/users')
+        const j = await r.json()
+        const list = j.users || []
+        const q = (searchInput.value || '').toLowerCase()
+        const rf = roleFilter.value || ''
+        const filtered = list.filter(u => {
+            const okQ = !q || (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q)
+            const okR = !rf || (u.role || '') === rf
+            return okQ && okR
+        })
+        usersTableBody.innerHTML = filtered.map(u => `
+            <tr class="border-b border-gray-700">
+                <td class="py-3 px-4 text-gray-300">${u.name || ''}</td>
+                <td class="py-3 px-4 text-gray-300">${u.email || ''}</td>
+                <td class="py-3 px-4">
+                    <div class="flex items-center gap-2">
+                        <select class="bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 roleSelect" data-id="${u.id}"></select>
+                        <label class="flex items-center gap-1 text-xs text-gray-400">
+                            <input type="checkbox" class="resetBalanceToggle" data-id="${u.id}">
+                            ${language === 'ar' ? 'إعادة الرصيد' : 'Reset balance'}
+                        </label>
+                    </div>
+                </td>
+                <td class="py-3 px-4">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-indigo-700/30 text-indigo-300 border border-indigo-600">
+                        <i class="bi bi-coin mr-1"></i>
+                        <span class="tokenBalance" data-id="${u.id}">${u.token_balance ?? 0}</span>
+                    </span>
+                </td>
+                <td class="py-3 px-4">
+                    <div class="flex items-center gap-2">
+                        <input type="number" class="bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 w-24 tokenAdjustInput" data-id="${u.id}" value="0">
+                        <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded grantBtn" data-id="${u.id}">
+                            ${language === 'ar' ? 'منح' : 'Grant'}
+                        </button>
+                        <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded revokeBtn" data-id="${u.id}">
+                            ${language === 'ar' ? 'سحب' : 'Revoke'}
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('')
+        await fetchRoles()
+        bindEvents()
+    }
+
+    const bindEvents = () => {
+        roleSelects().forEach(sel => {
+            sel.onchange = async () => {
+                const id = sel.dataset.id
+                const role = sel.value
+                const reset = resetBalanceToggles().find(x => x.dataset.id === id)?.checked || false
+                const ok = confirm(language === 'ar' ? 'تأكيد تغيير الدور؟' : 'Confirm role change?')
+                if (!ok) return
+                const r = await fetch(`/api/admin/users/${id}/role`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role, reset_balance: reset })
+                })
+                const j = await r.json()
+                if (j.success) {
+                    alert(language === 'ar' ? 'تم تحديث الدور' : 'Role updated', 'success')
+                    await refreshUsers()
+                } else {
+                    alert(j.message || 'Error', 'error')
+                }
+            }
+        })
+        document.querySelectorAll('.grantBtn').forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.dataset.id
+                const input = tokenAdjustInputs().find(x => x.dataset.id === id)
+                const val = parseInt(input.value || '0', 10)
+                if (val <= 0) return alert(language === 'ar' ? 'ادخل قيمة أكبر من صفر' : 'Enter a value greater than zero', 'error')
+                const ok = confirm(language === 'ar' ? 'تأكيد منح التوكنز؟' : 'Confirm grant tokens?')
+                if (!ok) return
+                const r = await fetch(`/api/admin/users/${id}/tokens`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adjust: val })
+                })
+                const j = await r.json()
+                if (j.success) {
+                    alert(language === 'ar' ? 'تم منح التوكنز' : 'Tokens granted', 'success')
+                    await refreshUsers()
+                } else {
+                    alert(j.message || 'Error', 'error')
+                }
+            }
+        })
+        document.querySelectorAll('.revokeBtn').forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.dataset.id
+                const input = tokenAdjustInputs().find(x => x.dataset.id === id)
+                const val = parseInt(input.value || '0', 10)
+                if (val <= 0) return alert(language === 'ar' ? 'ادخل قيمة أكبر من صفر' : 'Enter a value greater than zero', 'error')
+                const ok = confirm(language === 'ar' ? 'تأكيد سحب التوكنز؟' : 'Confirm revoke tokens?')
+                if (!ok) return
+                const r = await fetch(`/api/admin/users/${id}/tokens`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adjust: -val })
+                })
+                const j = await r.json()
+                if (j.success) {
+                    alert(language === 'ar' ? 'تم سحب التوكنز' : 'Tokens revoked', 'success')
+                    await refreshUsers()
+                } else {
+                    alert(j.message || 'Error', 'error')
+                }
+            }
+        })
+    }
+
+    document.getElementById('refreshBtn').onclick = refreshUsers
+    searchInput.oninput = refreshUsers
+    roleFilter.onchange = refreshUsers
+    refreshUsers()
+    </script>
+</body>
+</html>

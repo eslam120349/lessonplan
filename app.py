@@ -46,6 +46,30 @@ def load_user(user_id):
     from models import User
     return User.get_by_id(user_id)
 
+@login_manager.unauthorized_handler
+def handle_unauthorized():
+    from flask import request, jsonify, redirect, url_for
+    if request.path.startswith('/api/'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    return redirect(url_for('routes.login'))
+
+@app.errorhandler(401)
+@app.errorhandler(403)
+def handle_auth_errors(e):
+    from flask import request, jsonify, redirect, url_for
+    code = getattr(e, 'code', 500)
+    if request.path.startswith('/api/'):
+        return jsonify({'success': False, 'message': 'Forbidden' if code == 403 else 'Unauthorized'}), code
+    if code == 401:
+        return redirect(url_for('routes.login'))
+    return e
+
+@app.errorhandler(404)
+def handle_not_found(e):
+    from flask import request, jsonify
+    if request.path.startswith('/api/'):
+        return jsonify({'success': False, 'message': 'Not found'}), 404
+    return e
 # Import routes
 from routes import routes
 app.register_blueprint(routes)

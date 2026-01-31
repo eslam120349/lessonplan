@@ -2,7 +2,7 @@ import os
 import tempfile
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, send_file, session, current_app,abort
 from flask_login import login_user, logout_user, login_required, current_user
-from models import User, Lesson, Presentation
+from models import User, Lesson, Presentation, RoleConfig, TokenTransaction
 from forms import LoginForm, RegistrationForm, LessonForm, EditLessonForm, ARLessonForm, UserProfileForm, WhatsAppMessageForm
 from lesson_generator import generate_lesson_plan, gpt_plans
 from docx import Document
@@ -63,7 +63,11 @@ def get_user():
     return jsonify({
         'id': current_user.id,
         'name': current_user.name,
-        'email': current_user.email
+        'email': current_user.email,
+        'role': getattr(current_user, 'role', None),
+        'monthly_token_quota': getattr(current_user, 'monthly_token_quota', None),
+        'token_balance': getattr(current_user, 'token_balance', None),
+        'token_renewal_date': getattr(current_user, 'token_renewal_date', None)
     })
 
 @routes.route('/api/lessons', methods=['GET'])
@@ -76,6 +80,9 @@ def get_lessons():
 @login_required
 def create_lesson():
     data = request.get_json()
+
+    if not current_user.deduct_tokens(1, 'lesson_create', 'app'):
+        return jsonify({'success': False, 'message': 'Insufficient tokens', 'notify': 'نفدت التوكنز المتاحة. الرجاء الترقية أو انتظار التجديد الشهري.'}), 403
 
     # Generate lesson plan content first
     try:
@@ -109,6 +116,114 @@ def create_lesson():
         return jsonify({'success': False, 'message': 'Failed to create lesson'}), 500
 
     return jsonify({'success': True, 'lesson': lesson.to_dict()})
+
+@routes.route('/api/attendance/confirm', methods=['POST'])
+@login_required
+def confirm_attendance():
+    data = request.get_json() or {}
+    amount = int(data.get('amount') or 1)
+    reason = data.get('reason') or 'attendance'
+    if not current_user.deduct_tokens(amount, reason, 'app'):
+        return jsonify({'success': False, 'message': 'Insufficient tokens', 'notify': 'نفدت التوكنز المتاحة. الرجاء الترقية أو انتظار التجديد الشهري.'}), 403
+    return jsonify({'success': True, 'balance': current_user.token_balance})
+
+def require_admin():
+    if not current_user.is_admin():
+        abort(404)
+
+@routes.route('/admin')
+@login_required
+def admin_dashboard():
+    require_admin()
+    language = session.get('language', 'en')
+    supabase = current_app.config["SUPABASE_CLIENT"]
+    r = supabase.table('users').select("id,name,email,role,monthly_token_quota,token_balance").order('name').execute()
+    users = r.data or []
+    return render_template('ادمن/dashboard.html', users=users, language=language)
+
+@routes.route('/api/admin/users', methods=['GET'])
+@login_required
+def admin_list_users():
+    require_admin()
+    supabase = current_app.config["SUPABASE_CLIENT"]
+    r = supabase.table('users').select("id,name,email,role,monthly_token_quota,token_balance").order('name').execute()
+    return jsonify({'success': True, 'users': r.data or []})
+
+@routes.route('/api/admin/users/<user_id>/role', methods=['PUT'])
+@login_required
+def admin_update_role(user_id):
+    require_admin()
+    data = request.get_json() or {}
+    new_role = data.get('role')
+    reset_balance = bool(data.get('reset_balance', False))
+    target = User.get_by_id(user_id)
+    if not target:
+        return jsonify({'success': False, 'message': 'User not found'}), 404
+    quota = RoleConfig.get_quota_for_role(new_role)
+    update = {
+        'role': new_role,
+        'monthly_token_quota': quota
+    }
+    if reset_balance:
+        update['token_balance'] = quota
+    supabase = current_app.config["SUPABASE_CLIENT"]
+    supabase.table('users').update(update).eq('id', user_id).execute()
+    return jsonify({'success': True})
+
+@routes.route('/api/admin/users/<user_id>/tokens', methods=['PUT'])
+@login_required
+def admin_update_tokens(user_id):
+    require_admin()
+    data = request.get_json() or {}
+    adjust = data.get('adjust')
+    set_quota = data.get('monthly_token_quota')
+    set_balance = data.get('token_balance')
+    supabase = current_app.config["SUPABASE_CLIENT"]
+    target = User.get_by_id(user_id)
+    if not target:
+        return jsonify({'success': False, 'message': 'User not found'}), 404
+    update = {}
+    if isinstance(set_quota, int):
+        update['monthly_token_quota'] = set_quota
+    if isinstance(set_balance, int):
+        update['token_balance'] = set_balance
+    if update:
+        supabase.table('users').update(update).eq('id', user_id).execute()
+    if isinstance(adjust, int) and adjust != 0:
+        if adjust > 0:
+            target.add_tokens(adjust, 'admin_adjustment', 'admin')
+        else:
+            if not target.deduct_tokens(-adjust, 'admin_adjustment', 'admin'):
+                return jsonify({'success': False, 'message': 'Insufficient tokens for deduction'}), 400
+    return jsonify({'success': True})
+
+@routes.route('/api/admin/role-configs', methods=['PUT'])
+@login_required
+def admin_update_role_configs():
+    require_admin()
+    data = request.get_json() or {}
+    role = data.get('role')
+    monthly_quota = data.get('monthly_quota')
+    if not role or not isinstance(monthly_quota, int):
+        return jsonify({'success': False, 'message': 'Invalid data'}), 400
+    supabase = current_app.config["SUPABASE_CLIENT"]
+    try:
+        existing = supabase.table('role_configs').select("*").eq('role', role).execute()
+        if existing.data:
+            supabase.table('role_configs').update({'monthly_quota': monthly_quota}).eq('role', role).execute()
+        else:
+            supabase.table('role_configs').insert({'role': role, 'monthly_quota': monthly_quota}).execute()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@routes.route('/api/admin/role-configs', methods=['GET'])
+@login_required
+def admin_list_role_configs():
+    require_admin()
+    supabase = current_app.config["SUPABASE_CLIENT"]
+    r = supabase.table('role_configs').select("*").order('role').execute()
+    return jsonify({'success': True, 'roles': r.data or []})
 
 @routes.route('/api/lessons/<int:lesson_id>', methods=['GET'])
 @login_required
@@ -372,6 +487,9 @@ def create_lesson_form():
     form = LessonForm()
     
     if form.validate_on_submit():
+        if not current_user.deduct_tokens(1, 'lesson_create', 'web'):
+            flash('Insufficient tokens' if language == 'en' else 'نفدت التوكنز المتاحة. الرجاء الترقية أو انتظار التجديد الشهري.')
+            return render_template('create_lesson.html', form=form, language=language)
         # Generate lesson plan content first
         try:
             lesson_plan = generate_lesson_plan(
@@ -444,44 +562,6 @@ def edit_lesson_form(lesson_id):
             flash(f'Error updating lesson: {str(e)}')
 
     return render_template('edit_lesson.html', form=form, lesson=lesson, language=language)
-
-@routes.route('/textbook-to-lesson', methods=['GET', 'POST'])
-@login_required
-def textbook_to_lesson():
-    language = session.get('language', 'en')
-    form = ARLessonForm()
-
-    if form.validate_on_submit():
-        try:
-            # Process textbook content
-            lesson_plan = process_textbook_content(
-                form.grade_level.data,
-                form.topic.data,
-                form.teaching_strategy.data,
-                form.textbook_content.data
-            )
-
-            # Create new lesson using Supabase
-            lesson = Lesson.create(
-                user_id=current_user.id,
-                grade_level=form.grade_level.data,
-                topic=form.topic.data,
-                teaching_strategy=form.teaching_strategy.data,
-                language='Arabic',
-                generated_plan=lesson_plan
-            )
-
-            if lesson:
-                flash('تم توليد خطة الدرس من محتوى الكتاب بنجاح!')
-                return redirect(url_for('routes.edit_lesson_form', lesson_id=lesson.id))
-            else:
-                flash('فشل في إنشاء خطة الدرس')
-
-        except Exception as e:
-            flash(f'حدث خطأ أثناء معالجة محتوى الكتاب: {str(e)}')
-            return render_template('textbook_to_lesson.html', form=form, language=language)
-
-    return render_template('textbook_to_lesson.html', form=form, language=language)
 
 @routes.route('/user', methods=['GET', 'POST'])
 @login_required

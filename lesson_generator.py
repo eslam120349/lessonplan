@@ -7,8 +7,6 @@ client = OpenAI(
   api_key=os.environ.get("aiAPI"),
 )
 
-# Download NLTK data
-#nltk.download('punkt')
 
 # Templates for lesson plan sections
 OBJECTIVES_TEMPLATES = [
@@ -291,7 +289,7 @@ def generate_lesson_plan(grade_level, topic, strategy,language):
     "X-Title": "<YOUR_SITE_NAME>", # Optional. Site title for rankings on openrouter.ai.
   },
   extra_body={},
-  model="arcee-ai/trinity-large-preview:free",
+  model="deepseek/deepseek-r1-0528:free",
   messages=[
     {
       "role": "user",
