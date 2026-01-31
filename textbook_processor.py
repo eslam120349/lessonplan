@@ -3,8 +3,6 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 import re
 import random
 
-# تأكد من تنزيل الموارد اللازمة
-nltk.download('punkt')
 
 def clean_text(text):
     """تنظيف النص من الرموز والأحرف غير المرغوبة"""
