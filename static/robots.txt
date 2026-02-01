@@ -1,0 +1,39 @@
+
+User-agent: *
+Allow: /
+Allow: /register
+Allow: /login
+
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /dashboard/*
+Disallow: /lessons/
+Disallow: /user
+Disallow: /user/*
+Disallow: /edit-lesson/
+Disallow: /create-lesson
+Disallow: /whatsapp-sender
+Disallow: /download-lesson/
+
+# Disallow authentication endpoints
+Disallow: /api/register
+Disallow: /api/login
+Disallow: /api/logout
+Disallow: /logout
+Disallow: /delete-account
+
+# Allow static files
+Allow: /static/
+Allow: /static/*.css
+Allow: /static/*.js
+Allow: /static/*.png
+Allow: /static/*.jpg
+Allow: /static/*.jpeg
+Allow: /static/*.gif
+Allow: /static/*.svg
+
+# Crawl-delay
+Crawl-delay: 10
+
+# Sitemap location
+Sitemap: https://yourwebsite.com/sitemap.xml

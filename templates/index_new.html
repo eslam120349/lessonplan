@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher's Lesson Planner</title>
     
+        <!-- Primary Meta Tags -->
+    <meta name="description" content="Create professional lesson plans with AI assistance and export to PowerPoint. Save hours of preparation time with Teacher's Lesson Planner.">
+    <meta name="keywords" content="lesson plans, lesson planner, AI education, teaching tools, teachers, powerpoint, presentations, education technology, lesson preparation">
+    <meta name="author" content="Eslam120">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:title" content="Teacher's Lesson Planner - AI-Powered Lesson Plans">
+    <meta property="og:description" content="Create professional lesson plans with AI and export to PowerPoint with just a few clicks">
+    <meta property="og:image" content="{{ url_for('static', filename='generated-icon.png', _external=True) }}">
+    <meta property="og:site_name" content="Teacher's Lesson Planner">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ request.url }}">
+    <meta name="twitter:title" content="Teacher's Lesson Planner">
+    <meta name="twitter:description" content="Create AI-powered professional lesson plans">
+    <meta name="twitter:image" content="{{ url_for('static', filename='generated-icon.png', _external=True) }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='generated-icon.png') }}">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     

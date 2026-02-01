@@ -100,7 +100,7 @@ const LessonForm = () => {
         await axios.put(`/api/lessons/${id}`, formData);
         history.push(`/lessons/${id}`);
       } else {
-        // Create new lesson
+        await axios.post('/api/attendance/confirm', { amount: 1, reason: 'lesson_create' });
         const response = await axios.post('/api/lessons', formData);
         history.push(`/lessons/${response.data.lesson.id}`);
       }

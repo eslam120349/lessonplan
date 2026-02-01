@@ -774,3 +774,13 @@ def download_lesson(lesson_id):
         download_name=f'{lesson["topic"]}.docx',
         mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
+@routes.route('/sitemap.xml')
+def sitemap():
+    from flask import send_from_directory
+    return send_from_directory('static', 'sitemap.xml', mimetype='application/xml')
+
+@routes.route('/robots.txt')
+def robots():
+    from flask import send_from_directory
+    return send_from_directory('static', 'robots.txt', mimetype='text/plain')

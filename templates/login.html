@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Teacher's Lesson Planner</title>
     
+     <!-- Primary Meta Tags -->
+    <meta name="description" content="Login to Teacher's Lesson Planner to access your saved lesson plans, create new AI-powered lessons, and export to PowerPoint.">
+    <meta name="keywords" content="lesson planner login, teacher login, education platform, lesson plans access">
+    <meta name="author" content="Eslam120">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:title" content="Login - Teacher's Lesson Planner">
+    <meta property="og:description" content="Login to access your AI-powered lesson plans">
+    <meta property="og:image" content="{{ url_for('static', filename='generated-icon.png', _external=True) }}">
+    <meta property="og:site_name" content="Teacher's Lesson Planner">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ request.url }}">
+    <meta name="twitter:title" content="Login - Teacher's Lesson Planner">
+    <meta name="twitter:description" content="Login to access your AI-powered lesson plans">
+    <meta name="twitter:image" content="{{ url_for('static', filename='generated-icon.png', _external=True) }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='generated-icon.png') }}">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
