@@ -121,7 +121,7 @@ def create_lesson():
 @login_required
 def confirm_attendance():
     data = request.get_json() or {}
-    amount = int(data.get('amount') or 1)
+    amount = int(data.get('amount') or 2)
     reason = data.get('reason') or 'attendance'
     if not current_user.deduct_tokens(amount, reason, 'app'):
         return jsonify({'success': False, 'message': 'Insufficient tokens', 'notify': 'نفدت التوكنز المتاحة. الرجاء الترقية أو انتظار التجديد الشهري.'}), 403
