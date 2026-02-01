@@ -54,20 +54,20 @@
                         <td class="py-3 px-4 text-gray-300">{{ u.name }}</td>
                         <td class="py-3 px-4 text-gray-300">{{ u.email }}</td>
                         <td class="py-3 px-4">
-                            <div class="flex items-center gap-2">
-                                <select class="bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 roleSelect" data-id="{{ u.id }}">
-                                </select>
-                                <label class="flex items-center gap-1 text-xs text-gray-400">
-                                    <input type="checkbox" class="resetBalanceToggle" data-id="{{ u.id }}">
-                                    {% if language == 'ar' %}إعادة الرصيد{% else %}Reset balance{% endif %}
-                                </label>
-                            </div>
+                            <select class="bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 roleSelect" data-id="{{ u.id }}" data-current-role="{{ u.role }}">
+                            </select>
                         </td>
                         <td class="py-3 px-4">
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-indigo-700/30 text-indigo-300 border border-indigo-600">
-                                <i class="bi bi-coin mr-1"></i>
-                                <span class="tokenBalance" data-id="{{ u.id }}">{{ u.token_balance }}</span>
-                            </span>
+                            <div class="flex items-center gap-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-indigo-700/30 text-indigo-300 border border-indigo-600">
+                                    <i class="bi bi-coin mr-1"></i>
+                                    <span class="tokenBalance" data-id="{{ u.id }}">{{ u.token_balance }}</span>
+                                </span>
+                                <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded text-xs resetBalanceBtn" data-id="{{ u.id }}">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                    {% if language == 'ar' %}إعادة{% else %}Reset{% endif %}
+                                </button>
+                            </div>
                         </td>
                         <td class="py-3 px-4">
                             <div class="flex items-center gap-2">
@@ -90,7 +90,6 @@
     <script>
     const language = "{{ language }}"
     const roleSelects = () => Array.from(document.querySelectorAll('.roleSelect'))
-    const resetBalanceToggles = () => Array.from(document.querySelectorAll('.resetBalanceToggle'))
     const tokenAdjustInputs = () => Array.from(document.querySelectorAll('.tokenAdjustInput'))
     const tokenBalanceSpans = () => Array.from(document.querySelectorAll('.tokenBalance'))
     const usersTableBody = document.getElementById('usersTableBody')
@@ -116,12 +115,10 @@
         const j = await r.json()
         const roles = (j.roles || []).map(x => x.role)
         roleFilter.innerHTML = `<option value="">${language === 'ar' ? 'الكل' : 'All'}</option>` + roles.map(r => `<option value="${r}">${r}</option>`).join('')
+        
         roleSelects().forEach(sel => {
-            const userId = sel.dataset.id
-            const row = sel.closest('tr')
-            const currentRoleCell = row.querySelector('td:nth-child(3)')
-            const currentRoleText = currentRoleCell ? currentRoleCell.textContent.trim() : ''
-            sel.innerHTML = roles.map(r => `<option value="${r}" ${currentRoleText.includes(r) ? 'selected' : ''}>${r}</option>`).join('')
+            const currentRole = sel.dataset.currentRole || ''
+            sel.innerHTML = roles.map(r => `<option value="${r}" ${r === currentRole ? 'selected' : ''}>${r}</option>`).join('')
         })
     }
 
@@ -141,19 +138,19 @@
                 <td class="py-3 px-4 text-gray-300">${u.name || ''}</td>
                 <td class="py-3 px-4 text-gray-300">${u.email || ''}</td>
                 <td class="py-3 px-4">
-                    <div class="flex items-center gap-2">
-                        <select class="bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 roleSelect" data-id="${u.id}"></select>
-                        <label class="flex items-center gap-1 text-xs text-gray-400">
-                            <input type="checkbox" class="resetBalanceToggle" data-id="${u.id}">
-                            ${language === 'ar' ? 'إعادة الرصيد' : 'Reset balance'}
-                        </label>
-                    </div>
+                    <select class="bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 roleSelect" data-id="${u.id}" data-current-role="${u.role || ''}"></select>
                 </td>
                 <td class="py-3 px-4">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-indigo-700/30 text-indigo-300 border border-indigo-600">
-                        <i class="bi bi-coin mr-1"></i>
-                        <span class="tokenBalance" data-id="${u.id}">${u.token_balance ?? 0}</span>
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-indigo-700/30 text-indigo-300 border border-indigo-600">
+                            <i class="bi bi-coin mr-1"></i>
+                            <span class="tokenBalance" data-id="${u.id}">${u.token_balance ?? 0}</span>
+                        </span>
+                        <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded text-xs resetBalanceBtn" data-id="${u.id}">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            ${language === 'ar' ? 'إعادة' : 'Reset'}
+                        </button>
+                    </div>
                 </td>
                 <td class="py-3 px-4">
                     <div class="flex items-center gap-2">
@@ -177,13 +174,15 @@
             sel.onchange = async () => {
                 const id = sel.dataset.id
                 const role = sel.value
-                const reset = resetBalanceToggles().find(x => x.dataset.id === id)?.checked || false
                 const ok = confirm(language === 'ar' ? 'تأكيد تغيير الدور؟' : 'Confirm role change?')
-                if (!ok) return
+                if (!ok) {
+                    sel.value = sel.dataset.currentRole
+                    return
+                }
                 const r = await fetch(`/api/admin/users/${id}/role`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ role, reset_balance: reset })
+                    body: JSON.stringify({ role, reset_balance: false })
                 })
                 const j = await r.json()
                 if (j.success) {
@@ -191,9 +190,31 @@
                     await refreshUsers()
                 } else {
                     alert(j.message || 'Error', 'error')
+                    sel.value = sel.dataset.currentRole
                 }
             }
         })
+
+        document.querySelectorAll('.resetBalanceBtn').forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.dataset.id
+                const ok = confirm(language === 'ar' ? 'تأكيد إعادة تعيين الرصيد؟' : 'Confirm reset balance?')
+                if (!ok) return
+                
+                const r = await fetch(`/api/admin/users/${id}/reset-balance`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                const j = await r.json()
+                if (j.success) {
+                    alert(language === 'ar' ? 'تم إعادة تعيين الرصيد' : 'Balance reset', 'success')
+                    await refreshUsers()
+                } else {
+                    alert(j.message || 'Error', 'error')
+                }
+            }
+        })
+
         document.querySelectorAll('.grantBtn').forEach(btn => {
             btn.onclick = async () => {
                 const id = btn.dataset.id
@@ -216,6 +237,7 @@
                 }
             }
         })
+
         document.querySelectorAll('.revokeBtn').forEach(btn => {
             btn.onclick = async () => {
                 const id = btn.dataset.id

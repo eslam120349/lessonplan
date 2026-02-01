@@ -7,7 +7,6 @@ from forms import LoginForm, RegistrationForm, LessonForm, EditLessonForm, ARLes
 from lesson_generator import generate_lesson_plan, gpt_plans
 from docx import Document
 # from ppt_generator import create_presentation
-from textbook_processor import process_textbook_content
 # from whatsapp_sender import process_excel_file, open_whatsapp_web
 from urllib.parse import urlparse
 
@@ -121,11 +120,44 @@ def create_lesson():
 @login_required
 def confirm_attendance():
     data = request.get_json() or {}
-    amount = int(data.get('amount') or 2)
+    amount = int(data.get('amount') or 1)
     reason = data.get('reason') or 'attendance'
     if not current_user.deduct_tokens(amount, reason, 'app'):
         return jsonify({'success': False, 'message': 'Insufficient tokens', 'notify': 'نفدت التوكنز المتاحة. الرجاء الترقية أو انتظار التجديد الشهري.'}), 403
     return jsonify({'success': True, 'balance': current_user.token_balance})
+
+@routes.route('/api/admin/users/<user_id>/reset-balance', methods=['POST'])
+@login_required
+def admin_reset_balance(user_id):
+    require_admin()
+    
+    target = User.get_by_id(user_id)
+    if not target:
+        return jsonify({'success': False, 'message': 'User not found'}), 404
+    
+    # Get the quota for the user's current role
+    quota = RoleConfig.get_quota_for_role(target.role)
+    
+    # Reset balance to quota
+    supabase = current_app.config["SUPABASE_CLIENT"]
+    supabase.table('users').update({
+        'token_balance': quota
+    }).eq('id', user_id).execute()
+    
+    # Optional: Log this action in TokenTransaction
+    try:
+        TokenTransaction.create(
+            user_id=user_id,
+            amount=quota,
+            transaction_type='admin_reset',
+            source='admin',
+            reason='Balance reset by admin'
+        )
+    except:
+        pass  # If transaction logging fails, continue anyway
+    
+    return jsonify({'success': True, 'new_balance': quota})
+
 
 def require_admin():
     if not current_user.is_admin():
