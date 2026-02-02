@@ -93,6 +93,19 @@ hover:after:w-full
           </a>
         </div>
 
+          {% if current_user.is_admin() %}
+          <a href="/admin"
+             class="{{ link_base }}
+                    {% if active_page == 'admin' %}
+                      text-white after:w-full
+                    {% else %}
+                      text-gray-300 hover:text-white
+                    {% endif %}">
+            {% if language == 'ar' %}لوحة التحكم{% else %}Admin{% endif %}
+          </a>
+          {% endif %}
+
+
         {% else %}
         <!-- Guest -->
         <a href="/login"
